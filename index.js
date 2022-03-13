@@ -1,8 +1,8 @@
 import Player from "./classes/Player.js";
 import Projectile from "./classes/Projectile.js";
 import Enemy from "./classes/Enemy.js";
+import Particle from "./classes/particle.js";
 
-console.log(gsap);
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
 
@@ -16,6 +16,7 @@ const player = new Player(xCor, yCor, 10, "white", c);
 
 const projectiles = [];
 const enemies = [];
+const particles = [];
 
 function spawmEnemies() {
   setInterval(() => {
@@ -46,14 +47,21 @@ function animate() {
   c.fillStyle = "rgb(0, 0, 0, 0.1)";
   c.fillRect(0, 0, canvas.width, canvas.height);
   player.draw();
-  projectiles.forEach((p, index) => {
-    p.update();
+  particles.forEach((particle, index) => {
+    if (particle.alpha <= 0) {
+      particles.splice(index, 1);
+    } else {
+      particle.update();
+    }
+  });
+  projectiles.forEach((projectile, index) => {
+    projectile.update();
 
     if (
-      p.x + p.radius < 0 ||
-      p.x - p.radius > canvas.width ||
-      p.y + p.radius < 0 ||
-      p.y + p.radius > canvas.height
+      projectile.x + projectile.radius < 0 ||
+      projectile.x - projectile.radius > canvas.width ||
+      projectile.y + projectile.radius < 0 ||
+      projectile.y - projectile.radius > canvas.height
     ) {
       setTimeout(() => {
         projectiles.splice(index, 1);
@@ -61,23 +69,39 @@ function animate() {
     }
   });
 
-  enemies.forEach((en, index) => {
-    en.update();
+  enemies.forEach((enemy, index) => {
+    enemy.update();
 
-    const dist = Math.hypot(player.x - en.x, player.y - en.y);
+    const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
 
-    if (dist - en.radius - player.radius < 1) {
+    if (dist - enemy.radius - player.radius < 1) {
       cancelAnimationFrame(animationId);
     }
 
-    projectiles.forEach((p, pIndex) => {
-      const dist = Math.hypot(p.x - en.x, p.y - en.y);
+    projectiles.forEach((projectile, pIndex) => {
+      const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
 
-      if (dist - en.radius - p.radius < 1) {
-        if (en.radius - 10 > 5) {
-          gsap.to(en,  {
-            radius: en.radius - 10
-          })
+      if (dist - enemy.radius - projectile.radius < 1) {
+        for (let i = 0; i < enemy.radius * 2; i++) {
+          particles.push(
+            new Particle(
+              projectile.x,
+              projectile.y,
+              Math.random() * 2,
+              enemy.color,
+              {
+                x: (Math.random() - 0.5) * (Math.random() * 6),
+                y: (Math.random() - 0.5) * (Math.random() * 6),
+              },
+              c
+            )
+          );
+        }
+
+        if (enemy.radius - 10 > 5) {
+          gsap.to(enemy, {
+            radius: enemy.radius - 10,
+          });
           setTimeout(() => {
             projectiles.splice(pIndex, 1);
           }, 0);
