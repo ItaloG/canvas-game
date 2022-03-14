@@ -1,7 +1,7 @@
 import Player from "./classes/Player.js";
 import Projectile from "./classes/Projectile.js";
 import Enemy from "./classes/Enemy.js";
-import Particle from "./classes/particle.js";
+import Particle from "./classes/Particle.js";
 
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
