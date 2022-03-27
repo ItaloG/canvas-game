@@ -5,6 +5,10 @@ import Particle from "./classes/particle.js";
 
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
+const scoreNum = document.querySelector("#scoreNum");
+const startgameBtn = document.querySelector("#startGameBtn");
+const modal = document.querySelector("#modal");
+const finalScore = document.querySelector("#finalScore");
 
 canvas.width = innerWidth;
 canvas.height = innerHeight;
@@ -12,11 +16,23 @@ canvas.height = innerHeight;
 const xCor = canvas.width / 2;
 const yCor = canvas.height / 2;
 
-const player = new Player(xCor, yCor, 10, "white", c);
+let player = new Player(xCor, yCor, 10, "white", c);
+let projectiles = [];
+let enemies = [];
+let particles = [];
+let animationId;
+let score = 0;
 
-const projectiles = [];
-const enemies = [];
-const particles = [];
+function init() {
+  player = new Player(xCor, yCor, 10, "white", c);
+  projectiles = [];
+  enemies = [];
+  particles = [];
+  score = 0;
+  scoreNum.innerHTML = score;
+  finalScore.innerHTML = score;
+  startgameBtn.innerHTML = "Restart Game"
+}
 
 function spawmEnemies() {
   setInterval(() => {
@@ -41,7 +57,6 @@ function spawmEnemies() {
   }, 1000);
 }
 
-let animationId;
 function animate() {
   animationId = requestAnimationFrame(animate);
   c.fillStyle = "rgb(0, 0, 0, 0.1)";
@@ -76,6 +91,8 @@ function animate() {
 
     if (dist - enemy.radius - player.radius < 1) {
       cancelAnimationFrame(animationId);
+      modal.style.display = "flex";
+      finalScore.innerHTML = score;
     }
 
     projectiles.forEach((projectile, pIndex) => {
@@ -99,6 +116,9 @@ function animate() {
         }
 
         if (enemy.radius - 10 > 5) {
+          score += 100;
+          scoreNum.innerHTML = score;
+
           gsap.to(enemy, {
             radius: enemy.radius - 10,
           });
@@ -106,6 +126,9 @@ function animate() {
             projectiles.splice(pIndex, 1);
           }, 0);
         } else {
+          score += 250;
+          scoreNum.innerHTML = score;
+
           setTimeout(() => {
             enemies.splice(index, 1);
             projectiles.splice(pIndex, 1);
@@ -122,5 +145,9 @@ addEventListener("click", (e) => {
   projectiles.push(new Projectile(xCor, yCor, 5, "white", velocity, c));
 });
 
-animate();
-spawmEnemies();
+startgameBtn.addEventListener("click", () => {
+  init();
+  animate();
+  spawmEnemies();
+  modal.style.display = "none";
+});

@@ -21,6 +21,8 @@ export default class Particle {
 
   update() {
     this.draw();
+    this.velocity.x *= 0.99
+    this.velocity.y *= 0.99
     this.x = this.x + this.velocity.x;
     this.y = this.y + this.velocity.y;
     this.alpha -= 0.01;
